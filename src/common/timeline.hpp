@@ -74,6 +74,7 @@ class Timeline {
         template<typename T> Task(Operation op, HMatrix<T> * block1,
             HMatrix<T> * block2 = NULL, HMatrix<T> * block3 = NULL){}
         Task(Operation op, const int *a=NULL, const int *b=NULL, const int *c=NULL, const int *d=NULL, const int *e=NULL) {}
+        ~Task() {}
 #endif
     };
 
