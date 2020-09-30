@@ -553,4 +553,14 @@ int SpanClusteringAlgorithm::partition(
     return dim;
 }
 
+int FixedSizeClusteringAlgorithm::partition(ClusterTree& current, std::vector<ClusterTree*>& children, int currentAxis) const {
+  int offset=0;
+  for(int i = 0; i < childrenSizes_.size(); i++) {
+    children.push_back(current.slice(offset, childrenSizes_[i]));
+    offset += childrenSizes_[i];
+  }
+  HMAT_ASSERT(offset == current.data.size());
+  return currentAxis;
+}
+
 }  // end namespace hmat

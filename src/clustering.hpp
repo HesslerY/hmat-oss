@@ -202,6 +202,19 @@ public:
     int partition(ClusterTree& current, std::vector<ClusterTree*>& children, int currentAxis) const;
 };
 
+/**
+ * Create children with fixed sizes without sort
+ */
+class FixedSizeClusteringAlgorithm: public ClusteringAlgorithm {
+    const std::vector<int> childrenSizes_;
+public:
+    FixedSizeClusteringAlgorithm(const std::vector<int> &childrenSizes)
+      : childrenSizes_(childrenSizes) {}
+    std::string str() const { return "FixedSizeClusteringAlgorithm"; }
+    ClusteringAlgorithm* clone() const { return new FixedSizeClusteringAlgorithm(*this); }
+    int partition(ClusterTree& current, std::vector<ClusterTree*>& children, int currentAxis) const;
+};
+
 class VoidClusteringAlgorithm : public ClusteringAlgorithm
 {
 public:
