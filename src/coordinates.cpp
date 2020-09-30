@@ -102,6 +102,60 @@ DofCoordinates::~DofCoordinates()
     delete[] spanAABBs_;
 }
 
+void DofCoordinates::merge(const DofCoordinates& other) {
+  // Check compatibility
+  HMAT_ASSERT(dimension_ == other.dimension_);
+  HMAT_ASSERT( (spanOffsets_==NULL && other.spanOffsets_==NULL) || (spanOffsets_ != NULL && other.spanOffsets_ != NULL) );
+  HMAT_ASSERT(ownsMemory_);
+
+  // Merge vertex coordinates
+  double *new_v = new double[(size_+other.size_) * dimension_];
+  std::memcpy(new_v, v_, sizeof(double) * size_ * dimension_);
+  std::memcpy(new_v+size_ * dimension_, other.v_, sizeof(double) * other.size_ * dimension_);
+  if (ownsMemory_)
+    delete[] v_;
+  v_ = new_v;
+
+  // Merge spanOffset
+  if(spanOffsets_) {
+    unsigned *new_spanOffsets = new unsigned[numberOfDof_+other.numberOfDof_];
+    std::memcpy(new_spanOffsets, spanOffsets_, sizeof(unsigned) * numberOfDof_);
+    std::memcpy(new_spanOffsets+numberOfDof_, other.spanOffsets_, sizeof(unsigned) * other.numberOfDof_);
+    if (ownsMemory_)
+      delete[] spanOffsets_;
+    spanOffsets_ = new_spanOffsets;
+    // update spansOffset values
+    for (int i=numberOfDof_ ; i<numberOfDof_+other.numberOfDof_ ; i++)
+      spanOffsets_[i] += spanOffsets_[numberOfDof_-1];
+
+    // merge spans
+    unsigned n = spanOffsets_[numberOfDof_-1];
+    unsigned other_n = other.spanOffsets_[other.numberOfDof_-1];
+    unsigned *new_spans = new unsigned[n+other_n];
+    std::memcpy(new_spans, spans_, sizeof(unsigned) * n);
+    std::memcpy(new_spans+n, other.spans_, sizeof(unsigned) * other_n);
+    if (ownsMemory_)
+      delete[] spans_;
+    spans_ = new_spans;
+    // update spans values
+    for (int i=n ; i<n+other_n ; i++)
+      spans_[i] += size_;
+
+    // Merge spanAABBs
+    double *new_spanAABBs = new double[(numberOfDof_+other.numberOfDof_) * dimension_ * 2];
+    std::memcpy(new_spanAABBs, spanAABBs_, sizeof(double) * numberOfDof_* dimension_ * 2);
+    std::memcpy(new_spanAABBs+numberOfDof_* dimension_ * 2, other.spanAABBs_, sizeof(double) * other.numberOfDof_ * dimension_ * 2);
+    if (ownsMemory_)
+      delete[] spanAABBs_;
+    spanAABBs_ = new_spanAABBs;
+  }
+
+  // Update sizes
+  numberOfDof_ += other.numberOfDof_;
+  size_ += other.size_;
+
+}
+
 int DofCoordinates::size() const {
     HMAT_ASSERT(spanOffsets_ == NULL);
     return size_;

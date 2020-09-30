@@ -85,6 +85,10 @@ public:
    */
   ~DofCoordinates();
 
+  /*! \brief Merge with other DofCorrdinates
+     */
+  void merge(const DofCoordinates& other);
+
   /*! \brief Get number of points.
    * \deprecated Legacy API which does not support spans
    */
